@@ -17,7 +17,6 @@ The `data/` directory contains the following two files:
 
 Until the deadline the scores shown on the leaderboard will be accuracy on the training set. After the deadline, scores on the blind test set will be revealed and used for final grading of the assignment.
 
-
 Our Approach
 
 - To begin with, we tried using an LSTM to learn a representation for both hypothesis translations and the reference translation and make a prediction -1, 0, 1 by concatenating them and projecting them onto a softmax layer of size 3. I really wish this had worked but it didn't :-(
@@ -29,3 +28,12 @@ Our Approach
      * POS Tag F1-scores: We computed features for POS tags in the EXACT SAME manner as words described above.
      * Parse Tree kernels: We used Stanford CoreNLP's constituency parser to get parse trees for every sentence and then computed a tree kernel which we defined as the union of the number of identical subtrees in the hypothesis and reference translations. (We gave a higher score to larger subtrees that were identical). I don't think this feature helped a lot though.
      * N-gram language model: We used KenLM to train a language model on the PennTreebank and Broadcast News and used the scores of the both the hypothesis translations as features.
+
+- We also tried, and in some cases used scores from 1-line BLEU variant, modified precision (as in BLEU), and changing precision and recall to incorporate number of times a word is seen in both hypothesis and reference.
+  We extended precision and recall to N-gram settings (1,2,3).
+
+- Multi-class classifier using Gradient Boosted Decision Trees:
+     * We used XGBoost (https://github.com/dmlc/xgboost) an open source GBDT implementation, available as a python module. Gradient Boosting is a low-variance, low-bias technique that perform well in general, and  was used in winning solutions of several Kaggle competitions.
+     * Parameters were tuned for optimal performance on a held-out validation set. Depth of trees, number of trees and learning rate are the parameters that we tuned, keeping in mind the trade-offs.
+     * We checked whether the operating point of the parameters was good, by checking for various randomly generated train/validation set split up.
+     * We then generated the model on all of training data set at this operating point for the parameter. We used this model to generate scores for all of training data.
