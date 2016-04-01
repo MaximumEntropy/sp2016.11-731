@@ -22,7 +22,7 @@ def logadd(x,y):
     return x + math.log(1 + math.exp(y-x)) if y < x else y + math.log(1 + math.exp(x-y))
 
 parser = argparse.ArgumentParser(description='Compute unnormalized translation probability by marginalizing over alignments.')
-parser.add_argument('-i', '--input', dest='input', default='data/input', help='File containing sentences to translate (default=data/input)')
+parser.add_argument('-i', '--input', dest='input', default='input_temp.txt', help='File containing sentences to translate (default=input_temp.txt)')
 parser.add_argument('-t', '--translation-model', dest='tm', default='data/tm', help='File containing translation model (default=data/tm)')
 parser.add_argument('-l', '--language-model', dest='lm', default='data/lm', help='File containing ARPA-format language model (default=data/lm)')
 opts = parser.parse_args()
@@ -31,7 +31,6 @@ tm = models.TM(opts.tm,sys.maxint)
 lm = models.LM(opts.lm)
 french_sents = [tuple(line.strip().split()) for line in open(opts.input).readlines()]
 english_sents = [tuple(line.strip().split()) for line in sys.stdin]
-print len(french_sents), len(english_sents)
 if (len(french_sents) != len(english_sents)):
     sys.stderr.write("ERROR: French and English files are not the same length! Only complete output can be graded!\n")
     sys.exit(1)
@@ -84,12 +83,13 @@ for sent_num, (f, e) in enumerate(zip(french_sents, english_sents)):
     if goal in chart[len(e)]:
         sent_logprob += chart[len(e)][goal]
         total_logprob += sent_logprob
+        print sent_logprob
     else:
         #sys.stderr.write("ERROR: COULD NOT ALIGN SENTENCE %d\n" % sent_num)
         unaligned_sentences += 1
 
-if unaligned_sentences > 0:
-    sys.stderr.write("ERROR: There were %d unaligned sentences! Only sentences that align under the model can be graded!\n" % unaligned_sentences)
+#if unaligned_sentences > 0:
+    #sys.stderr.write("ERROR: There were %d unaligned sentences! Only sentences that align under the model can be graded!\n" % unaligned_sentences)
 
-sys.stdout.write("%f\n" % total_logprob)
+#sys.stdout.write("%f\n" % total_logprob)
 
